@@ -17,6 +17,10 @@ export default function Dashboard() {
   const [similarIssues, setSimilarIssues] = useState([]);
   const [showSimilarWarning, setShowSimilarWarning] = useState(false);
 
+  // Edit states
+  const [editingIssueId, setEditingIssueId] = useState(null);
+  const [editFormData, setEditFormData] = useState({});
+
   // Filter states
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
@@ -213,6 +217,54 @@ export default function Dashboard() {
     }
   };
 
+  const handleEdit = (issue) => {
+    setEditingIssueId(issue.id);
+    setEditFormData({
+      title: issue.title,
+      description: issue.description,
+      priority: issue.priority,
+      status: issue.status,
+      assignedTo: issue.assignedTo || ''
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingIssueId(null);
+    setEditFormData({});
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleUpdateIssue = async (issueId) => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const issueRef = doc(db, 'issues', issueId);
+      await updateDoc(issueRef, {
+        ...editFormData,
+        updatedAt: new Date().toISOString()
+      });
+
+      await fetchIssues();
+      setSuccess('Issue updated successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+      
+      setEditingIssueId(null);
+      setEditFormData({});
+    } catch (error) {
+      setError('Failed to update issue: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="dashboard">
       <header className="dashboard-header">
@@ -371,6 +423,15 @@ export default function Dashboard() {
                       <span className={`priority-badge priority-${issue.priority.toLowerCase()}`}>
                         {issue.priority}
                       </span>
+                      {editingIssueId !== issue.id && (
+                        <button
+                          onClick={() => handleEdit(issue)}
+                          className="btn-edit"
+                          title="Edit Issue"
+                        >
+                          Edit
+                        </button>
+                      )}
                       <button
                         onClick={() => handleDelete(issue.id)}
                         className="btn-delete"
@@ -381,36 +442,120 @@ export default function Dashboard() {
                     </div>
                   </div>
                   
-                  <p className="issue-description">{issue.description}</p>
-                  
-                  <div className="issue-meta">
-                    <div className="issue-field">
-                      <strong>Status:</strong>
-                      <select
-                        value={issue.status}
-                        onChange={(e) => handleStatusChange(issue.id, issue.status, e.target.value)}
-                        className="status-select"
-                      >
-                        <option value="Open">Open</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Done">Done</option>
-                      </select>
-                    </div>
-                    
-                    {issue.assignedTo && (
-                      <div className="issue-field">
-                        <strong>Assigned To:</strong> {issue.assignedTo}
+                  {editingIssueId === issue.id ? (
+                    <div className="edit-form">
+                      <div className="form-group">
+                        <label>Title *</label>
+                        <input
+                          type="text"
+                          name="title"
+                          value={editFormData.title}
+                          onChange={handleEditInputChange}
+                          required
+                        />
                       </div>
-                    )}
-                    
-                    <div className="issue-field">
-                      <strong>Created By:</strong> {issue.createdBy}
+
+                      <div className="form-group">
+                        <label>Description *</label>
+                        <textarea
+                          name="description"
+                          value={editFormData.description}
+                          onChange={handleEditInputChange}
+                          required
+                        />
+                      </div>
+
+                      <div className="form-row">
+                        <div className="form-group">
+                          <label>Priority *</label>
+                          <select
+                            name="priority"
+                            value={editFormData.priority}
+                            onChange={handleEditInputChange}
+                            required
+                          >
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                          </select>
+                        </div>
+
+                        <div className="form-group">
+                          <label>Status *</label>
+                          <select
+                            name="status"
+                            value={editFormData.status}
+                            onChange={handleEditInputChange}
+                            required
+                          >
+                            <option value="Open">Open</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Done">Done</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="form-group">
+                        <label>Assigned To</label>
+                        <input
+                          type="text"
+                          name="assignedTo"
+                          value={editFormData.assignedTo}
+                          onChange={handleEditInputChange}
+                          placeholder="Email or name"
+                        />
+                      </div>
+
+                      <div className="edit-actions">
+                        <button
+                          onClick={() => handleUpdateIssue(issue.id)}
+                          disabled={loading}
+                          className="btn-primary"
+                        >
+                          {loading ? 'Updating...' : 'Update Issue'}
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="btn-secondary"
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
-                    
-                    <div className="issue-field">
-                      <strong>Created:</strong> {new Date(issue.createdAt).toLocaleString()}
-                    </div>
-                  </div>
+                  ) : (
+                    <>
+                      <p className="issue-description">{issue.description}</p>
+                      
+                      <div className="issue-meta">
+                        <div className="issue-field">
+                          <strong>Status:</strong>
+                          <select
+                            value={issue.status}
+                            onChange={(e) => handleStatusChange(issue.id, issue.status, e.target.value)}
+                            className="status-select"
+                          >
+                            <option value="Open">Open</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Done">Done</option>
+                          </select>
+                        </div>
+                        
+                        {issue.assignedTo && (
+                          <div className="issue-field">
+                            <strong>Assigned To:</strong> {issue.assignedTo}
+                          </div>
+                        )}
+                        
+                        <div className="issue-field">
+                          <strong>Created By:</strong> {issue.createdBy}
+                        </div>
+                        
+                        <div className="issue-field">
+                          <strong>Created:</strong> {new Date(issue.createdAt).toLocaleString()}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
             </div>
