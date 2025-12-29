@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { collection, addDoc, getDocs, query, orderBy, updateDoc, doc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, orderBy, updateDoc, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import './Dashboard.css';
 
@@ -181,12 +181,26 @@ export default function Dashboard() {
         status: newStatus,
         updatedAt: new Date().toISOString()
       });
-      
+
       await fetchIssues();
       setSuccess('Status updated successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       setError('Failed to update status: ' + error.message);
+    }
+  };
+
+  const handleDelete = async (issueId) => {
+    if (window.confirm('Are you sure you want to delete this issue? This action cannot be undone.')) {
+      try {
+        const issueRef = doc(db, 'issues', issueId);
+        await deleteDoc(issueRef);
+        await fetchIssues();
+        setSuccess('Issue deleted successfully!');
+        setTimeout(() => setSuccess(''), 3000);
+      } catch (error) {
+        setError('Failed to delete issue: ' + error.message);
+      }
     }
   };
 
@@ -353,9 +367,18 @@ export default function Dashboard() {
                 <div key={issue.id} className="issue-card">
                   <div className="issue-header">
                     <h3>{issue.title}</h3>
-                    <span className={`priority-badge priority-${issue.priority.toLowerCase()}`}>
-                      {issue.priority}
-                    </span>
+                    <div className="issue-header-actions">
+                      <span className={`priority-badge priority-${issue.priority.toLowerCase()}`}>
+                        {issue.priority}
+                      </span>
+                      <button
+                        onClick={() => handleDelete(issue.id)}
+                        className="btn-delete"
+                        title="Delete Issue"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                   
                   <p className="issue-description">{issue.description}</p>
