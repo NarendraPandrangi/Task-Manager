@@ -4,7 +4,7 @@ A modern, intelligent issue tracking system built with React, Firebase, and depl
 
 ## 🚀 Live Demo
 
-[View Live Application](https://your-app.vercel.app) *(Update after deployment)*
+[View Live Application](https://task-manager-azure-seven-80.vercel.app/login) *(Update after deployment)*
 
 ## 📋 Features
 
