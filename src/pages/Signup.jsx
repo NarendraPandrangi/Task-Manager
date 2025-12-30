@@ -8,6 +8,7 @@ export default function Signup() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const { signup } = useAuth();
   const navigate = useNavigate();
@@ -23,7 +24,13 @@ export default function Signup() {
       setError('');
       setLoading(true);
       await signup(email, password);
-      alert('Successfully registered!');
+      setSuccess('Successfully registered!');
+      
+      // Redirect to login page after 2 seconds
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+      
     } catch (error) {
       setError('Failed to create an account: ' + error.message);
     } finally {
@@ -36,6 +43,7 @@ export default function Signup() {
       <div className="auth-card">
         <h2>Sign Up</h2>
         {error && <div className="error-message">{error}</div>}
+        {success && <div className="success-message">{success}</div>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label>Email</label>
