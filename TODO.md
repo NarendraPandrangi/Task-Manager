@@ -1,5 +1,10 @@
-# Task: Modify Signup to Show Alert on Success Without Navigating to Dashboard
+# TODO: Make UI Jira-like with Responsive Buttons
 
-## Steps to Complete:
-- [x] Edit src/pages/Signup.jsx to show alert message "Successfully registered!" after successful signup and remove navigation to dashboard
-- [x] Test the signup functionality to ensure alert appears and user stays on signup page
+## Tasks
+- [x] Create base .btn class with consistent padding (0.75rem 1.5rem) and font-size (1rem)
+- [x] Update .btn-primary, .btn-secondary, .btn-logout to inherit from .btn
+- [x] Update .btn-edit, .btn-delete to be smaller but consistent
+- [x] Change color scheme to Jira-like blue (#0052CC, #0065FF, etc.)
+- [ ] Update layout spacing and typography to match Jira
+- [ ] Adjust media queries for uniform button scaling
+- [ ] Test responsiveness across screen sizes

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -73,7 +74,7 @@ export default function Dashboard() {
   const calculateSimilarity = (str1, str2) => {
     const s1 = str1.toLowerCase();
     const s2 = str2.toLowerCase();
-    
+
     // Check for exact substring match
     if (s1.includes(s2) || s2.includes(s1)) {
       return 0.8;
@@ -83,7 +84,7 @@ export default function Dashboard() {
     const words1 = s1.split(/\s+/);
     const words2 = s2.split(/\s+/);
     const commonWords = words1.filter(word => words2.includes(word) && word.length > 3);
-    
+
     if (commonWords.length > 0) {
       return commonWords.length / Math.max(words1.length, words2.length);
     }
@@ -123,7 +124,7 @@ export default function Dashboard() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // If there are similar issues and user hasn't been warned, show warning
     if (similarIssues.length > 0 && showSimilarWarning) {
       // Warning is already shown, user needs to confirm
@@ -133,7 +134,7 @@ export default function Dashboard() {
     try {
       setLoading(true);
       setError('');
-      
+
       const issueData = {
         ...formData,
         createdBy: currentUser.email,
@@ -142,7 +143,7 @@ export default function Dashboard() {
       };
 
       await addDoc(collection(db, 'issues'), issueData);
-      
+
       setSuccess('Issue created successfully!');
       setFormData({
         title: '',
@@ -154,10 +155,10 @@ export default function Dashboard() {
       setSimilarIssues([]);
       setShowSimilarWarning(false);
       setShowForm(false);
-      
+
       // Refresh issues
       await fetchIssues();
-      
+
       setTimeout(() => setSuccess(''), 3000);
     } catch (error) {
       setError('Failed to create issue: ' + error.message);
@@ -245,7 +246,7 @@ export default function Dashboard() {
     try {
       setLoading(true);
       setError('');
-      
+
       const issueRef = doc(db, 'issues', issueId);
       await updateDoc(issueRef, {
         ...editFormData,
@@ -255,7 +256,7 @@ export default function Dashboard() {
       await fetchIssues();
       setSuccess('Issue updated successfully!');
       setTimeout(() => setSuccess(''), 3000);
-      
+
       setEditingIssueId(null);
       setEditFormData({});
     } catch (error) {
@@ -280,16 +281,16 @@ export default function Dashboard() {
         {success && <div className="success-message">{success}</div>}
 
         <div className="actions-bar">
-          <button 
-            onClick={() => setShowForm(!showForm)} 
+          <button
+            onClick={() => setShowForm(!showForm)}
             className="btn-primary"
           >
             {showForm ? 'Cancel' : 'Create New Issue'}
           </button>
 
           <div className="filters">
-            <select 
-              value={statusFilter} 
+            <select
+              value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="filter-select"
             >
@@ -299,8 +300,8 @@ export default function Dashboard() {
               <option value="Done">Done</option>
             </select>
 
-            <select 
-              value={priorityFilter} 
+            <select
+              value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
               className="filter-select"
             >
@@ -337,8 +338,8 @@ export default function Dashboard() {
                       </li>
                     ))}
                   </ul>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={handleContinueAnyway}
                     className="btn-secondary"
                   >
@@ -398,8 +399,8 @@ export default function Dashboard() {
                 />
               </div>
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={loading || showSimilarWarning}
                 className="btn-primary"
               >
@@ -429,7 +430,7 @@ export default function Dashboard() {
                           className="btn-edit"
                           title="Edit Issue"
                         >
-                          Edit
+                          ✏️ Edit
                         </button>
                       )}
                       <button
@@ -437,11 +438,11 @@ export default function Dashboard() {
                         className="btn-delete"
                         title="Delete Issue"
                       >
-                        Delete
+                        🗑️ Delete
                       </button>
                     </div>
                   </div>
-                  
+
                   {editingIssueId === issue.id ? (
                     <div className="edit-form">
                       <div className="form-group">
@@ -525,7 +526,7 @@ export default function Dashboard() {
                   ) : (
                     <>
                       <p className="issue-description">{issue.description}</p>
-                      
+
                       <div className="issue-meta">
                         <div className="issue-field">
                           <strong>Status:</strong>
@@ -539,17 +540,17 @@ export default function Dashboard() {
                             <option value="Done">Done</option>
                           </select>
                         </div>
-                        
+
                         {issue.assignedTo && (
                           <div className="issue-field">
                             <strong>Assigned To:</strong> {issue.assignedTo}
                           </div>
                         )}
-                        
+
                         <div className="issue-field">
                           <strong>Created By:</strong> {issue.createdBy}
                         </div>
-                        
+
                         <div className="issue-field">
                           <strong>Created:</strong> {new Date(issue.createdAt).toLocaleString()}
                         </div>
